@@ -13,9 +13,11 @@ def get_version():
 class PredictRequest(BaseModel):
     value: int  
 
+MODEL_VERSION = "model-1" 
+
 @app.get("/health")
 def health():
-    return {"status": "healthy","application": "student-ml-api","version": get_version() }
+    return {"status": "healthy","application": "student-ml-api","application_version": get_version(),"model_version": MODEL_VERSION}
 
 
 @app.post("/predict")
