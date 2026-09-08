@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -22,7 +22,7 @@ jobs:
           pip install pytest httpx
 
       - name: Run tests
-        run: pytest
+        run: python -m pytest
 
   docker-build-check:
     runs-on: ubuntu-latest
