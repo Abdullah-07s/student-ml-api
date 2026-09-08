@@ -43,12 +43,13 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Build Docker image
-  run: |
-    docker build \
-      --build-arg APP_VERSION=${{ steps.get_version.outputs.version }} \
-      --build-arg GIT_COMMIT=${{ github.sha }} \
-      --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
-      -t ghcr.io/abdullah-07s/student-ml-api:${{ steps.get_version.outputs.version }} .
+        run: |
+          docker build \
+            --build-arg APP_VERSION=${{ steps.get_version.outputs.version }} \
+            --build-arg GIT_COMMIT=${{ github.sha }} \
+            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+            -t ghcr.io/abdullah-07s/student-ml-api:${{ steps.get_version.outputs.version }} .
+
       - name: Tag image as latest
         run: |
           docker tag ghcr.io/abdullah-07s/student-ml-api:${{ steps.get_version.outputs.version }} ghcr.io/abdullah-07s/student-ml-api:latest
