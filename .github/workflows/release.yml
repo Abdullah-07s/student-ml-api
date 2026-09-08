@@ -54,7 +54,16 @@ jobs:
         run: |
           docker tag ghcr.io/abdullah-07s/student-ml-api:${{ steps.get_version.outputs.version }} ghcr.io/abdullah-07s/student-ml-api:latest
 
+      - name: Tag image with commit SHA
+        id: get_sha
+        run: |
+          FULL_SHA=${{ github.sha }}
+          SHORT_SHA=${FULL_SHA:0:7}
+          docker tag ghcr.io/abdullah-07s/student-ml-api:${{ steps.get_version.outputs.version }} ghcr.io/abdullah-07s/student-ml-api:$SHORT_SHA
+          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+
       - name: Push images
         run: |
           docker push ghcr.io/abdullah-07s/student-ml-api:${{ steps.get_version.outputs.version }}
           docker push ghcr.io/abdullah-07s/student-ml-api:latest
+          docker push ghcr.io/abdullah-07s/student-ml-api:${{ steps.get_sha.outputs.short_sha }}
