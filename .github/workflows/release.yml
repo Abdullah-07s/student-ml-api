@@ -5,8 +5,52 @@ on:
     tags:
       - "v*.*.*"
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
-  placeholder:
+  release:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Release workflow will be implemented in Part 14/15"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest httpx
+
+      - name: Run tests
+        run: python -m pytest
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build Docker image
+        run: |
+          docker build -t ghcr.io/abdullah-07s/student-ml-api:${{ steps.get_version.outputs.version }} .
+
+      - name: Tag image as latest
+        run: |
+          docker tag ghcr.io/abdullah-07s/student-ml-api:${{ steps.get_version.outputs.version }} ghcr.io/abdullah-07s/student-ml-api:latest
+
+      - name: Push images
+        run: |
+          docker push ghcr.io/abdullah-07s/student-ml-api:${{ steps.get_version.outputs.version }}
+          docker push ghcr.io/abdullah-07s/student-ml-api:latest
