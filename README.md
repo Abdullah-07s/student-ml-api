@@ -47,11 +47,6 @@ curl http://localhost:5000/health
 {
   "status": "healthy",
   "application": "student-ml-api",
-  "application_version": "1.1.0",
-  "model_version": "model-1"
-}
-```
-> Note: `application_version` reflects the `VERSION` file's content, which tracks actual application code changes. It can differ from the latest published image tag (e.g. `1.1.2`) when a release only changes the CI/CD pipeline itself rather than the application — see [`Document.md`](Document.md) for details.
 
 **`POST /predict`**
 ```json
