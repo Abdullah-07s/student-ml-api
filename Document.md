@@ -50,8 +50,12 @@ All development happened on feature branches, merged into `main` exclusively via
 | #1 | `feature/prediction-api` | Initial app, tests, requirements |
 | #2 | `feature/release-workflow` | Real GHCR release pipeline |
 | #3 | `feature/model-metadata` | v1.1.0 — model_version field |
+| #4 | `feature/oci-labels` | OCI image labels for traceability |
 | #5 | `fix/release-yaml-indentation` | Bugfix — broken YAML from OCI labels PR |
 | #6 | `feature/commit-sha-tag` | Commit-SHA image tagging |
+| #7 | `demo/docker-build-failure` | Deliberate Docker build failure demonstration (Part 26) |
+| #8 | `docs/submission-writeup-v2` | Submission writeup (Document.md) |
+| #9 | `Abdullah-07s-patch-1` | Project README |
 
 **Merge strategy: Merge Commit**, chosen deliberately over squash/rebase, because:
 1. It preserves the deliberate test-failure-then-fix commit pair from Part 6 as real, individually inspectable history rather than collapsing it.
@@ -156,6 +160,8 @@ Note: `.env` is excluded here as a defensive default, even though this project n
 
 `latest` correctly tracks the most recent release (verified at each step); older versions remain independently pullable.
 
+**Note on `VERSION` file vs. image tag:** the running application's `/health` endpoint reports whatever the `VERSION` file contained at build time, which is independent of the Docker image's external tag or the Git tag used to trigger the release. Releases `v1.1.1` and `v1.1.2` were pipeline-only changes (a YAML indentation fix and the addition of commit-SHA tagging, respectively) — no application code changed, so the `VERSION` file's content intentionally remained `1.1.0` for those releases. This was confirmed during a fresh-clone dry run: pulling `ghcr.io/abdullah-07s/student-ml-api:latest` (digest matching the `v1.1.2` release) correctly returns `"application_version":"1.1.0"` in `/health`, since the application itself has not changed since v1.1.0. This is expected behavior, not a bug — it demonstrates that the image tag (tracking the release/pipeline) and the application version (tracking actual code behavior) are able to move independently, which is a deliberate and desirable property once a project has a real model-serving lifecycle (see Viva Q15).
+
 ---
 
 ## 10. Reproducibility (Part 17)
@@ -255,7 +261,24 @@ Two experiments were run:
 
 ---
 
-## 18. How to Run Locally
+## 18. Fresh-Clone Verification (Final Dry Run)
+
+To confirm the entire submission works exactly as documented — not just "on the development machine" — the repository was cloned fresh into a separate, untouched directory and every documented workflow was re-run verbatim:
+
+1. `git clone` — succeeded, full history and all four version tags (`v1.0.0`–`v1.1.2`) present and correctly linked to their merge commits.
+2. Local setup (venv, `pip install -r requirements.txt`, `pip install pytest httpx`) — succeeded with no manual fixes.
+3. `python -m pytest` — 4/4 tests passed immediately.
+4. `uvicorn app:app --reload` — started cleanly, endpoints functioned as documented.
+5. `docker build` — succeeded, all layers cached correctly from the prior local build state.
+6. Local container run + `curl /health` — returned the correct response.
+7. `docker pull ghcr.io/abdullah-07s/student-ml-api:latest` — succeeded; the pulled digest (`sha256:7c7683c6...a6059ba`) matched the recorded `v1.1.2` digest exactly.
+8. Running the pulled registry image — `/health` responded correctly (see the VERSION-vs-tag note above for why `application_version` reads `1.1.0`).
+
+This confirms the submission is reproducible by a third party from nothing but the public repository and registry — no hidden local state or undocumented steps.
+
+---
+
+## 19. How to Run Locally
 
 ```powershell
 python -m venv .venv
@@ -266,7 +289,7 @@ python -m pytest
 uvicorn app:app --reload
 ```
 
-## 19. How to Run via Docker
+## 20. How to Run via Docker
 
 ```powershell
 docker build -t student-ml-api:local .
@@ -274,7 +297,7 @@ docker run -d --name student-ml-api -p 5000:5000 student-ml-api:local
 curl.exe http://localhost:5000/health
 ```
 
-## 20. How to Pull the Published Image
+## 21. How to Pull the Published Image
 
 ```powershell
 docker pull ghcr.io/abdullah-07s/student-ml-api:latest

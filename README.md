@@ -47,10 +47,6 @@ curl http://localhost:5000/health
 {
   "status": "healthy",
   "application": "student-ml-api",
-  "application_version": "1.1.2",
-  "model_version": "model-1"
-}
-```
 
 **`POST /predict`**
 ```json
